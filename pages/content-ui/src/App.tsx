@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
 function isInViewport(element: HTMLElement | null) {
   if (!element) return false;
@@ -153,58 +153,6 @@ export default function App() {
     [clearHighlights, options],
   );
 
-  const [selectionWrapper, setSelectionWrapper] = useState<HTMLElement | null>(null);
-
-  const removeSelectionWrapper = useCallback(() => {
-    console.log('removing selection wrapper', selectionWrapper);
-    if (selectionWrapper) {
-      const parent = selectionWrapper.parentNode;
-      if (parent) {
-        parent.replaceChild(document.createTextNode(selectionWrapper.textContent || ''), selectionWrapper);
-      }
-      setSelectionWrapper(null);
-    }
-  }, [selectionWrapper]);
-
-  const clearSelectionAndInput = useCallback(() => {
-    removeSelectionWrapper();
-    setSearchText('');
-  }, [removeSelectionWrapper]);
-
-  const handleSelectionChange = useCallback(
-    (event: Event) => {
-      console.log('selectionchange', selectionWrapper, event);
-      if (selectionWrapper) {
-        removeSelectionWrapper();
-      }
-    },
-    [removeSelectionWrapper, selectionWrapper],
-  );
-
-  useEffect(() => {
-    document.addEventListener('selectionchange', handleSelectionChange);
-    return () => document.removeEventListener('selectionchange', handleSelectionChange);
-  }, [handleSelectionChange]);
-
-  const wrapSelection = useCallback(() => {
-    removeSelectionWrapper();
-
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
-
-    const range = selection.getRangeAt(0);
-    if (range.toString().trim() === '') return;
-
-    const span = document.createElement('span');
-    span.style.backgroundColor = 'red'; // Mild highlight color
-    span.style.borderRadius = '3px';
-    span.style.padding = '1px';
-    span.classList.add('selection-highlight');
-
-    setSelectionWrapper(span);
-    range.surroundContents(span);
-  }, [removeSelectionWrapper]);
-
   const handleSearchTextChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearchText(e.target.value);
@@ -222,7 +170,6 @@ export default function App() {
         <button
           onClick={() => {
             clearHighlights();
-            clearSelectionAndInput();
           }}
           className="text-red-500">
           Clear
@@ -234,7 +181,6 @@ export default function App() {
         value={searchText}
         onChange={handleSearchTextChange}
         className="border p-2 w-full mb-2"
-        onFocus={wrapSelection}
       />
       <div className="flex gap-2">
         <label>
@@ -268,14 +214,6 @@ export default function App() {
             onChange={() => setOptions(prev => ({ ...prev, onlyViewport: !prev.onlyViewport }))}
           />{' '}
           Viewport Only
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={options.onlySelection}
-            onChange={() => setOptions(prev => ({ ...prev, onlySelection: !prev.onlySelection }))}
-          />{' '}
-          Selection Only
         </label>
       </div>
       <button onClick={scrollToFirstHighlight} className="mt-2 bg-blue-500 text-white p-2">
