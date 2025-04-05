@@ -219,7 +219,7 @@ export default function App() {
       {/* Close Finder */}
       <button
         onClick={closeFinder}
-        className="w-6 h-6 min-w-6 min-h-6 text-[1.5rem] text-red-500 flex items-center justify-center pb-1 select-none">
+        className="w-6 h-6 min-w-6 min-h-6 text-[1.5rem] text-red-500 flex items-center justify-center pb-1 select-none overflow-hidden">
         ×
       </button>
     </div>
