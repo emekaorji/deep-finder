@@ -23,7 +23,7 @@ const DEFAULT_CHOICES = [
 ];
 
 export default async function deleteModules(manifestObject: chrome.runtime.ManifestV3) {
-  const choices = DEFAULT_CHOICES.filter(choice => {
+  const choices = DEFAULT_CHOICES.filter((choice) => {
     if (choice.value === 'background') {
       return !!manifestObject.background;
     }
@@ -88,7 +88,7 @@ async function deleteContentScript(manifestObject: chrome.runtime.ManifestV3) {
   await zipFolder(resolve(pagesPath, 'content'), resolve(archivePath, 'content.zip'));
   void rimraf(resolve(pagesPath, 'content'));
   const jsName = 'content/index.iife.js';
-  manifestObject.content_scripts = manifestObject.content_scripts?.filter(script => {
+  manifestObject.content_scripts = manifestObject.content_scripts?.filter((script) => {
     return !script.js?.includes(jsName);
   });
 }
@@ -97,7 +97,7 @@ async function deleteContentScriptUI(manifestObject: chrome.runtime.ManifestV3) 
   await zipFolder(resolve(pagesPath, 'content-ui'), resolve(archivePath, 'content-ui.zip'));
   void rimraf(resolve(pagesPath, 'content-ui'));
   const jsName = 'content-ui/index.iife.js';
-  manifestObject.content_scripts = manifestObject.content_scripts?.filter(script => {
+  manifestObject.content_scripts = manifestObject.content_scripts?.filter((script) => {
     return !script.js?.includes(jsName);
   });
 }
@@ -106,7 +106,7 @@ async function deleteContentScriptRuntime(manifestObject: chrome.runtime.Manifes
   await zipFolder(resolve(pagesPath, 'content-runtime'), resolve(archivePath, 'content-runtime.zip'));
   void rimraf(resolve(pagesPath, 'content-runtime'));
   const jsName = 'content-runtime/index.iife.js';
-  manifestObject.content_scripts = manifestObject.content_scripts?.filter(script => {
+  manifestObject.content_scripts = manifestObject.content_scripts?.filter((script) => {
     return !script.js?.includes(jsName);
   });
 }
@@ -144,7 +144,7 @@ async function deleteSidePanel(manifestObject: chrome.runtime.ManifestV3) {
     delete manifestObject.side_panel;
   }
   if (manifestObject.permissions?.includes('sidePanel')) {
-    manifestObject.permissions = manifestObject.permissions.filter(permission => permission !== 'sidePanel');
+    manifestObject.permissions = manifestObject.permissions.filter((permission) => permission !== 'sidePanel');
   }
 }
 
@@ -195,7 +195,7 @@ async function zipFolder(path: string, out: string) {
           output.end();
           promiseReject(new Error('Aborted'));
         },
-        error => {
+        (error) => {
           aborted = true;
           output.end();
           promiseReject(error);
@@ -222,7 +222,7 @@ function streamFileToZip(
       typeof chunk === 'string' ? data.push(Buffer.from(chunk), false) : data.push(chunk, false),
     )
     .on('end', () => data.push(new Uint8Array(0), true))
-    .on('error', error => {
+    .on('error', (error) => {
       onAbort();
       onError(error);
     });
