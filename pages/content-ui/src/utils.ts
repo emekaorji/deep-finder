@@ -135,8 +135,9 @@ function highlightText(text: string, options: SearchOptions): HTMLElement[] {
     for (let i = matchedRanges.length - 1; i >= 0; i--) {
       const range = matchedRanges[i];
       const mark = document.createElement('mark');
-      mark.style.backgroundColor = '#ffff00';
-      mark.style.color = '#000000';
+      mark.style.backgroundColor = '#ffff00 !important';
+      mark.style.color = '#000000 !important';
+      mark.setAttribute('style', 'background-color: #ffff00 !important; color: #000000 !important;');
       try {
         range.surroundContents(mark);
         newMarks.unshift(mark);
@@ -178,11 +179,15 @@ function focusIncomingMark(incomingMark?: HTMLElement, currentMark?: HTMLElement
   if (!incomingMark) return;
 
   if (currentMark) {
-    currentMark.style.backgroundColor = '#ffff00';
+    currentMark.style.backgroundColor = '#ffff00 !important';
+    currentMark.style.color = '#000000 !important';
+    currentMark.setAttribute('style', 'background-color: #ffff00 !important; color: #000000 !important;');
   }
 
   incomingMark.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-  incomingMark.style.backgroundColor = '#fc9636';
+  incomingMark.style.backgroundColor = '#fc9636 !important';
+  incomingMark.style.color = '#000000 !important';
+  incomingMark.setAttribute('style', 'background-color: #fc9636 !important; color: #000000 !important;');
 }
 
 export { isInViewport, getClosestMarkIndex, highlightText, clearHighlights, focusIncomingMark };
