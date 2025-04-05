@@ -29,11 +29,11 @@ const wrapPromise = <R,>(promise: Promise<R>) => {
   let status = 'pending';
   let result: R;
   const suspender = promise.then(
-    r => {
+    (r) => {
       status = 'success';
       result = r;
     },
-    e => {
+    (e) => {
       status = 'error';
       result = e;
     },
