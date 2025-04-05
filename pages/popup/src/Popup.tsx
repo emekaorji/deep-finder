@@ -30,7 +30,7 @@ const Popup = () => {
         target: { tabId: tab.id! },
         files: ['/content-runtime/index.iife.js'],
       })
-      .catch(err => {
+      .catch((err) => {
         // Handling errors related to other paths
         if (err.message.includes('Cannot access a chrome:// URL')) {
           chrome.notifications.create('inject-error', notificationOptions);
