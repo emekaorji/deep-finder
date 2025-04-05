@@ -141,8 +141,8 @@ export default function App() {
     let newMarksCount = 0;
 
     setMarks((prevMarks) => {
-      const newMarks = highlightText(searchText, options);
       clearHighlights(prevMarks);
+      const newMarks = highlightText(searchText, options);
       newMarksCount = newMarks.length;
       return newMarks;
     });
