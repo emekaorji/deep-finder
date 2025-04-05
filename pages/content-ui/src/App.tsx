@@ -1,8 +1,8 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { searchInputStorage, searchOptionsStorage } from '@extension/storage';
 import { useStorage } from '@extension/shared';
 import useKeybindings from './useKeybindings';
-import { highlightText, clearHighlights, focusIncomingMark, getClosestMarkIndex } from './utils';
+import { highlightText, clearHighlights, focusIncomingMark, isInViewport } from './utils';
 
 export default function App() {
   // Visibility
@@ -18,6 +18,8 @@ export default function App() {
   // Marked elements
   const [marks, setMarks] = useState<HTMLElement[]>([]);
   const [activeMarkIndex, setActiveMarkIndex] = useState(-1);
+
+  const cachedActiveMarkIndexAndSearchText = useRef({ activeMarkIndex: -1, searchText: '' });
 
   const handleSearchTextChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value);
@@ -51,14 +53,30 @@ export default function App() {
     });
   }, [marks]);
 
-  const handleClosestMark = useCallback((newMarks: HTMLElement[]) => {
+  const handleClosestMark = useCallback((newMarks: HTMLElement[], searchText: string) => {
     if (!newMarks.length) {
       setActiveMarkIndex(-1);
       return;
     }
 
+    const { activeMarkIndex: cachedActiveMarkIndex, searchText: cachedSearchText } =
+      cachedActiveMarkIndexAndSearchText.current;
+
+    if (searchText === cachedSearchText) {
+      setActiveMarkIndex(() => {
+        const incomingIndex = cachedActiveMarkIndex;
+        const incomingMark = newMarks[incomingIndex];
+        focusIncomingMark(incomingMark);
+        return incomingIndex;
+      });
+      cachedActiveMarkIndexAndSearchText.current = { activeMarkIndex: -1, searchText: '' };
+      return;
+    }
+
     setActiveMarkIndex(() => {
-      const closestMarkIndex = getClosestMarkIndex(newMarks);
+      const firstMarkIndex = 0;
+      const viewportMarkIndex = newMarks.findIndex((mark) => isInViewport(mark));
+      const closestMarkIndex = viewportMarkIndex > -1 ? viewportMarkIndex : firstMarkIndex;
 
       // Find the mark directly in the window viewport
       const closestMark = newMarks[closestMarkIndex];
@@ -90,12 +108,13 @@ export default function App() {
   }, [input, keyBindingTargetRef]);
 
   const closeFinder = useCallback(() => {
+    cachedActiveMarkIndexAndSearchText.current = { activeMarkIndex, searchText };
     clearHighlights(marks);
     setMarks([]);
     setActiveMarkIndex(-1);
     setSearchText('');
     setIsVisible(false);
-  }, [marks]);
+  }, [activeMarkIndex, marks, searchText]);
 
   // Global keybindings
   useKeybindings([
@@ -123,7 +142,7 @@ export default function App() {
     });
 
     setTimeout(() => {
-      handleClosestMark(newMarks);
+      handleClosestMark(newMarks, searchText);
     }, 0);
   }, [searchText, options, handleClosestMark]);
 

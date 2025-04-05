@@ -18,11 +18,22 @@ function isInViewport(element: HTMLElement | null) {
 
 /**
  * Get the index of the closest mark to the center of the viewport
+ * If at the top of the page, it will return the first mark
  * @param marks - The array of marks to check
  * @returns The index of the closest mark to the center of the viewport
  */
 function getClosestMarkIndex(marks: HTMLElement[]) {
+  const firstMarkIndex = 0;
+
+  // Return the first mark if at the top of the page
+  if (window.scrollY === 0) return firstMarkIndex;
+
+  // Return the first mark if there are no viewport marks (just double-checking)
+  if (!marks.length) return firstMarkIndex;
+
+  // Return the first mark if there are no viewport marks
   const viewportMarks = marks.filter((mark) => isInViewport(mark));
+  if (!viewportMarks.length) return firstMarkIndex;
 
   // sorted from center of viewport to top of viewport to bottom of viewport
   const sortedViewportMarks = viewportMarks.sort((a, b) => {
@@ -37,7 +48,6 @@ function getClosestMarkIndex(marks: HTMLElement[]) {
     return aDistanceFromCenter - bDistanceFromCenter;
   });
 
-  const firstMarkIndex = 0;
   const viewportMarkIndex = marks.findIndex((mark) => mark === sortedViewportMarks[0]);
   const closestMarkIndex = viewportMarkIndex > -1 ? viewportMarkIndex : firstMarkIndex;
   return closestMarkIndex;
@@ -171,7 +181,7 @@ function focusIncomingMark(incomingMark?: HTMLElement, currentMark?: HTMLElement
     currentMark.style.backgroundColor = '#ffff00';
   }
 
-  incomingMark.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+  incomingMark.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
   incomingMark.style.backgroundColor = '#fc9636';
 }
 
