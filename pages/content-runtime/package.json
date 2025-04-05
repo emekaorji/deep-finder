@@ -1,7 +1,7 @@
 {
   "name": "@extension/content-runtime-script",
   "version": "0.4.3",
-  "description": "deep finder - content runtime script",
+  "description": "chrome extension - content runtime script",
   "type": "module",
   "private": true,
   "sideEffects": true,

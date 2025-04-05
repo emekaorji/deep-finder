@@ -1,7 +1,7 @@
 {
   "name": "@extension/content-ui",
   "version": "0.4.3",
-  "description": "deep finder - content ui",
+  "description": "chrome extension - content ui",
   "type": "module",
   "private": true,
   "sideEffects": true,
