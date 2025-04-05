@@ -1,4 +1,4 @@
-import { type RefObject, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 type KeyCombo = 'shift+f' | 'escape' | 'enter' | 'shift+enter';
 type KeyHandler = (event?: KeyboardEvent) => void;
@@ -8,7 +8,6 @@ interface Keybinding {
   handler: KeyHandler;
   preventDefault?: boolean;
   stopPropagation?: boolean;
-  elementRef?: RefObject<HTMLElement | null>;
 }
 
 /**
@@ -34,7 +33,9 @@ const getKeyCombo = (event: KeyboardEvent): KeyCombo => {
  * If the ref is not attached to any element, shortcuts will be bound globally.
  * @param bindings Array of keybindings to register
  */
-const useKeybindings = (bindings: Keybinding[]) => {
+const useKeybindings = <T extends HTMLElement>(bindings: Keybinding[]) => {
+  const elementRef = useRef<T>(null);
+
   useEffect(() => {
     const keyHandler = (event: Event) => {
       const keyboardEvent = event as KeyboardEvent;
@@ -42,23 +43,21 @@ const useKeybindings = (bindings: Keybinding[]) => {
       const binding = bindings.find((b) => b.keys.includes(combo));
 
       if (binding) {
-        // If the binding is for a specific element, check if the event target is the same element
-        if (binding.elementRef && binding.elementRef.current !== event.target) {
-          return;
-        }
-
         if (binding.preventDefault) keyboardEvent.preventDefault();
         if (binding.stopPropagation) keyboardEvent.stopPropagation();
         binding.handler(keyboardEvent);
       }
     };
 
-    window.addEventListener('keydown', keyHandler);
+    const target = elementRef.current || window;
+    target.addEventListener('keydown', keyHandler);
 
     return () => {
-      window.removeEventListener('keydown', keyHandler);
+      target.removeEventListener('keydown', keyHandler);
     };
   }, [bindings]);
+
+  return { keyBindingTargetRef: elementRef };
 };
 
 export default useKeybindings;

@@ -1,103 +1,149 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { searchInputStorage, searchOptionsStorage } from '@extension/storage';
 import { useStorage } from '@extension/shared';
 import useKeybindings from './useKeybindings';
 
+/**
+ * Check if the element is in the viewport
+ * @param element - The element to check
+ * @returns True if the element is in the viewport, false otherwise
+ */
 function isInViewport(element: HTMLElement | null) {
   if (!element) return false;
   const rect = element.getBoundingClientRect();
   return rect.top >= 0 && rect.left >= 0 && rect.bottom <= window.innerHeight && rect.right <= window.innerWidth;
 }
 
+/**
+ * Get the index of the closest mark to the center of the viewport
+ * @param marks - The array of marks to check
+ * @returns The index of the closest mark to the center of the viewport
+ */
+function getClosestMarkIndex(marks: HTMLElement[]) {
+  const viewportMarks = marks.filter((mark) => isInViewport(mark));
+
+  // sorted from center of viewport to top of viewport to bottom of viewport
+  const sortedViewportMarks = viewportMarks.sort((a, b) => {
+    const aRect = a.getBoundingClientRect();
+    const bRect = b.getBoundingClientRect();
+
+    // Calculate distance from center of viewport
+    const viewportCenterY = window.innerHeight / 2;
+    const aDistanceFromCenter = Math.abs(aRect.top + aRect.height / 2 - viewportCenterY);
+    const bDistanceFromCenter = Math.abs(bRect.top + bRect.height / 2 - viewportCenterY);
+
+    return aDistanceFromCenter - bDistanceFromCenter;
+  });
+
+  const firstMarkIndex = 0;
+  const viewportMarkIndex = marks.findIndex((mark) => mark === sortedViewportMarks[0]);
+  const closestMarkIndex = viewportMarkIndex > -1 ? viewportMarkIndex : firstMarkIndex;
+  return closestMarkIndex;
+}
+
+/**
+ * Highlight the text
+ * @param text - The text to highlight
+ * @param options - The options for the search
+ * @returns The array of marks
+ */
 function highlightText(text: string, options: SearchOptions): HTMLElement[] {
   if (!text.trim()) return [];
 
-  let searchText = text;
-  let flags = 'g';
+  try {
+    let searchText = text;
+    let flags = 'g';
 
-  // Escape special regex characters if not using regex mode
-  if (!options.useRegex) {
-    searchText = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Escape special regex characters if not using regex mode
+    if (!options.useRegex) {
+      searchText = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-    // Apply whole word option
-    if (options.wholeWord) {
-      searchText = `\\b${searchText}\\b`;
-    }
-  }
-
-  // Case insensitivity
-  if (!options.preserveCase) {
-    flags += 'i';
-  }
-
-  const regex = new RegExp(searchText, flags);
-
-  //
-  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
-    acceptNode: (node) => {
-      // Ignore empty or whitespace-only text nodes
-      if (!node.nodeValue?.trim()) return NodeFilter.FILTER_SKIP;
-
-      // Skip hidden elements
-      const element = node.parentElement;
-      if (
-        element &&
-        (window.getComputedStyle(element).display === 'none' ||
-          window.getComputedStyle(element).visibility === 'hidden')
-      ) {
-        return NodeFilter.FILTER_SKIP;
-      }
-
-      // Check viewport limitation
-      if (options.onlyViewport && element && !isInViewport(element)) {
-        return NodeFilter.FILTER_SKIP;
-      }
-
-      return NodeFilter.FILTER_ACCEPT;
-    },
-  });
-
-  const matchedRanges: Range[] = [];
-  const newMarks: HTMLElement[] = [];
-
-  while (walker.nextNode()) {
-    const node = walker.currentNode as Text;
-    const parent = node.parentElement;
-
-    // Skip if already highlighted or within our search UI
-    if (parent?.tagName === 'MARK' || parent?.closest('.deepfinder-container')) continue;
-
-    const nodeValue = node.nodeValue || '';
-    const matches = nodeValue.matchAll(regex);
-
-    for (const match of matches) {
-      if (match && match.index !== undefined) {
-        const range = document.createRange();
-        range.setStart(node, match.index);
-        range.setEnd(node, match.index + match[0].length);
-        matchedRanges.push(range);
+      // Apply whole word option
+      if (options.wholeWord) {
+        searchText = `\\b${searchText}\\b`;
       }
     }
-  }
 
-  // Apply highlights in reverse order to avoid affecting positions
-  for (let i = matchedRanges.length - 1; i >= 0; i--) {
-    const range = matchedRanges[i];
-    const mark = document.createElement('mark');
-    mark.style.backgroundColor = '#ffff00';
-    mark.style.color = '#000000';
-    try {
-      range.surroundContents(mark);
-      newMarks.unshift(mark);
-    } catch {
-      // Skip if can't surround (happens with partial node selections)
-      // console.log("Couldn't highlight:", e);
+    // Case insensitivity
+    if (!options.preserveCase) {
+      flags += 'i';
     }
-  }
 
-  return newMarks;
+    const regex = new RegExp(searchText, flags);
+
+    //
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: (node) => {
+        // Ignore empty or whitespace-only text nodes
+        if (!node.nodeValue?.trim()) return NodeFilter.FILTER_SKIP;
+
+        // Skip hidden elements
+        const element = node.parentElement;
+        if (
+          element &&
+          (window.getComputedStyle(element).display === 'none' ||
+            window.getComputedStyle(element).visibility === 'hidden')
+        ) {
+          return NodeFilter.FILTER_SKIP;
+        }
+
+        // Check viewport limitation
+        if (options.onlyViewport && element && !isInViewport(element)) {
+          return NodeFilter.FILTER_SKIP;
+        }
+
+        return NodeFilter.FILTER_ACCEPT;
+      },
+    });
+
+    const matchedRanges: Range[] = [];
+    const newMarks: HTMLElement[] = [];
+
+    while (walker.nextNode()) {
+      const node = walker.currentNode as Text;
+      const parent = node.parentElement;
+
+      // Skip if already highlighted or within our search UI
+      if (parent?.tagName === 'MARK' || parent?.closest('.deepfinder-container')) continue;
+
+      const nodeValue = node.nodeValue || '';
+      const matches = nodeValue.matchAll(regex);
+
+      for (const match of matches) {
+        if (match && match.index !== undefined) {
+          const range = document.createRange();
+          range.setStart(node, match.index);
+          range.setEnd(node, match.index + match[0].length);
+          matchedRanges.push(range);
+        }
+      }
+    }
+
+    // Apply highlights in reverse order to avoid affecting positions
+    for (let i = matchedRanges.length - 1; i >= 0; i--) {
+      const range = matchedRanges[i];
+      const mark = document.createElement('mark');
+      mark.style.backgroundColor = '#ffff00';
+      mark.style.color = '#000000';
+      try {
+        range.surroundContents(mark);
+        newMarks.unshift(mark);
+      } catch {
+        // Skip if can't surround (happens with partial node selections)
+        // console.log("Couldn't highlight:", e);
+      }
+    }
+
+    return newMarks;
+  } catch {
+    return [];
+  }
 }
 
+/**
+ * Clear the highlights
+ * @param marks - The array of marks to clear
+ */
 function clearHighlights(marks: HTMLElement[]) {
   marks.forEach((mark) => {
     const parent = mark.parentNode;
@@ -111,15 +157,19 @@ function clearHighlights(marks: HTMLElement[]) {
   });
 }
 
-// Scroll to mark and highlight it
-function focusIncomingMark(currentMark?: HTMLElement, incomingMark?: HTMLElement) {
+/**
+ * Scroll to mark and highlight it
+ * @param incomingMark - The incoming mark to focus
+ * @param currentMark - The current mark to blur
+ */
+function focusIncomingMark(incomingMark?: HTMLElement, currentMark?: HTMLElement) {
   if (!incomingMark) return;
 
   if (currentMark) {
     currentMark.style.backgroundColor = '#ffff00';
   }
 
-  incomingMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  incomingMark.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
   incomingMark.style.backgroundColor = '#fc9636';
 }
 
@@ -145,16 +195,6 @@ export default function App() {
   const [marks, setMarks] = useState<HTMLElement[]>([]);
   const [activeMarkIndex, setActiveMarkIndex] = useState(-1);
 
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const openFinder = useCallback(() => {
-    setIsVisible(true);
-    setSearchText(input);
-    setTimeout(() => {
-      inputRef.current?.select();
-    }, 0);
-  }, [input]);
-
   const handleSearchTextChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value);
     // Defer the storage update to avoid blocking the main thread
@@ -163,14 +203,6 @@ export default function App() {
     }, 0);
   }, []);
 
-  const closeFinder = useCallback(() => {
-    clearHighlights(marks);
-    setMarks([]);
-    setActiveMarkIndex(-1);
-    setSearchText('');
-    setIsVisible(false);
-  }, [marks]);
-
   const handlePreviousMark = useCallback(() => {
     if (!marks.length) return;
 
@@ -178,7 +210,7 @@ export default function App() {
       const incomingIndex = currentIndex === 0 ? marks.length - 1 : currentIndex - 1;
       const currentMark = marks[currentIndex];
       const incomingMark = marks[incomingIndex];
-      focusIncomingMark(currentMark, incomingMark);
+      focusIncomingMark(incomingMark, currentMark);
       return incomingIndex;
     });
   }, [marks]);
@@ -190,12 +222,58 @@ export default function App() {
       const incomingIndex = currentIndex === marks.length - 1 ? 0 : currentIndex + 1;
       const currentMark = marks[currentIndex];
       const incomingMark = marks[incomingIndex];
-      focusIncomingMark(currentMark, incomingMark);
+      focusIncomingMark(incomingMark, currentMark);
       return incomingIndex;
     });
   }, [marks]);
 
-  // Keybindings
+  const handleClosestMark = useCallback((newMarks: HTMLElement[]) => {
+    if (!newMarks.length) {
+      setActiveMarkIndex(-1);
+      return;
+    }
+
+    setActiveMarkIndex(() => {
+      const closestMarkIndex = getClosestMarkIndex(newMarks);
+
+      // Find the mark directly in the window viewport
+      const closestMark = newMarks[closestMarkIndex];
+
+      focusIncomingMark(closestMark);
+
+      return closestMarkIndex;
+    });
+  }, []);
+
+  // Input keybindings
+  const { keyBindingTargetRef } = useKeybindings<HTMLInputElement>([
+    {
+      keys: ['enter'],
+      handler: handleNextMark,
+    },
+    {
+      keys: ['shift+enter'],
+      handler: handlePreviousMark,
+    },
+  ]);
+
+  const openFinder = useCallback(() => {
+    setIsVisible(true);
+    setSearchText(input);
+    setTimeout(() => {
+      keyBindingTargetRef.current?.select();
+    }, 0);
+  }, [input, keyBindingTargetRef]);
+
+  const closeFinder = useCallback(() => {
+    clearHighlights(marks);
+    setMarks([]);
+    setActiveMarkIndex(-1);
+    setSearchText('');
+    setIsVisible(false);
+  }, [marks]);
+
+  // Global keybindings
   useKeybindings([
     {
       keys: ['shift+f'],
@@ -207,31 +285,23 @@ export default function App() {
       handler: closeFinder,
       preventDefault: true,
     },
-    {
-      keys: ['enter'],
-      handler: handleNextMark,
-      elementRef: inputRef,
-    },
-    {
-      keys: ['shift+enter'],
-      handler: handlePreviousMark,
-      elementRef: inputRef,
-    },
   ]);
 
   // On search text or options change, highlight the text
   useEffect(() => {
-    let newMarksCount = 0;
+    let newMarks: HTMLElement[] = [];
 
     setMarks((prevMarks) => {
       clearHighlights(prevMarks);
-      const newMarks = highlightText(searchText, options);
-      newMarksCount = newMarks.length;
-      return newMarks;
+      const _newMarks = highlightText(searchText, options);
+      newMarks = _newMarks;
+      return _newMarks;
     });
 
-    setActiveMarkIndex(() => (newMarksCount > 0 ? 0 : -1));
-  }, [searchText, options]);
+    setTimeout(() => {
+      handleClosestMark(newMarks);
+    }, 0);
+  }, [searchText, options, handleClosestMark]);
 
   return (
     <div
@@ -244,7 +314,7 @@ export default function App() {
           className="w-full h-6 text-[0.8rem] focus:outline-none"
           onChange={handleSearchTextChange}
           placeholder="Enter search text..."
-          ref={inputRef}
+          ref={keyBindingTargetRef}
           type="text"
           value={searchText}
         />
