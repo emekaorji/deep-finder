@@ -19,6 +19,7 @@ export default function App() {
   const [marks, setMarks] = useState<HTMLElement[]>([]);
   const [activeMarkIndex, setActiveMarkIndex] = useState(-1);
 
+  // Cache the active mark index to re-highlight the last active mark when the search text does not change
   const cachedActiveMarkIndexAndSearchText = useRef({ activeMarkIndex: -1, searchText: '' });
 
   const handleSearchTextChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
