@@ -1,6 +1,6 @@
 # Deep Finder
 
-![Deep Finder Logo](https://res.cloudinary.com/coderabbi/image/upload/v1743901105/deep-finder/deep-finder-logo_qdyddb.png)
+![Deep Finder Logo](https://res.cloudinary.com/coderabbi/image/upload/v1743904629/deep-finder/deep-finder-logo-large_shsj48.png)
 
 ![](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)
 ![](https://img.shields.io/badge/Typescript-3178C6?style=flat-square&logo=typescript&logoColor=white)
