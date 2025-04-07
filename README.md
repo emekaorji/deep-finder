@@ -23,7 +23,7 @@ Deep Finder provides an advanced set of search capabilities that go well beyond 
 - **Intuitive Navigation**: Quickly move between search results
 - **Keyboard Shortcuts**: Efficiently search without losing your flow
 
-![Deep Finder in action](./assets/screenshot-placeholder.png)
+![Deep Finder in action](https://res.cloudinary.com/coderabbi/image/upload/v1744066253/deep-finder/deep-finder-demo-fast_ndfesw.gif)
 
 ## Installation
 
@@ -49,7 +49,7 @@ Deep Finder's intuitive interface provides easy access to all search options:
 - **.***: Use regular expressions
 - **|⇔|**: Search only in the current viewport
 
-![Deep Finder search options](./assets/options-placeholder.png)
+![Deep Finder search options](https://res.cloudinary.com/coderabbi/image/upload/v1744067548/deep-finder/deep-finder-search-options_j8ddww.png)
 
 ### Keyboard Shortcuts
 
@@ -64,7 +64,7 @@ Deep Finder highlights all matches and clearly indicates which result you're cur
 
 Use the arrow buttons or keyboard shortcuts to navigate between matches.
 
-![Deep Finder navigation](./assets/navigation-placeholder.png)
+![Deep Finder navigation](https://res.cloudinary.com/coderabbi/image/upload/v1744067654/deep-finder/deep-finder-navigation_fwrkk7.png)
 
 ## Coming Soon
 
