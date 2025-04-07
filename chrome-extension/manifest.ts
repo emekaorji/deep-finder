@@ -30,14 +30,13 @@ const manifest = {
   version: packageJson.version,
   description: '__MSG_extensionDescription__',
   host_permissions: ['<all_urls>'],
-  permissions: ['storage', 'scripting', 'tabs', 'notifications'],
+  permissions: ['storage', 'scripting', 'tabs', 'activeTab'],
   background: {
     service_worker: 'background.js',
     type: 'module',
   },
   action: {
-    default_popup: 'popup/index.html',
-    default_icon: 'icon-34.png',
+    default_title: 'Click me!',
   },
   chrome_url_overrides: {},
   icons: {

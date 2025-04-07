@@ -8,6 +8,7 @@
 
 ![GitHub action badge](https://github.com/emekaorji/deep-finder/actions/workflows/build-zip.yml/badge.svg)
 ![GitHub action badge](https://github.com/emekaorji/deep-finder/actions/workflows/lint.yml/badge.svg)
+![GitHub action badge](https://github.com/emekaorji/deep-finder/actions/workflows/codeql.yml/badge.svg)
 
 A powerful Chrome extension that enhances in-page search capabilities beyond the browser's default find functionality.
 

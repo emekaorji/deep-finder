@@ -102,7 +102,18 @@ export default function App() {
 
   const openFinder = useCallback(() => {
     setIsVisible(true);
-    setSearchText(input);
+
+    // if there's a selected text, use it as the search text, otherwise use the cached search text
+    const selectedText = window.getSelection()?.toString();
+    if (selectedText) {
+      setSearchText(selectedText);
+      setTimeout(() => {
+        searchInputStorage.setSearchInput(selectedText);
+      }, 0);
+    } else {
+      setSearchText(input);
+    }
+
     setTimeout(() => {
       keyBindingTargetRef.current?.select();
     }, 0);
@@ -146,6 +157,24 @@ export default function App() {
       handleClosestMark(newMarks, searchText);
     }, 0);
   }, [searchText, options, handleClosestMark]);
+
+  useEffect(() => {
+    const listener = (message: { action: string }) => {
+      if (message.action === 'trigger') {
+        if (isVisible) {
+          closeFinder();
+        } else {
+          openFinder();
+        }
+      }
+    };
+
+    chrome.runtime.onMessage.addListener(listener);
+
+    return () => {
+      chrome.runtime.onMessage.removeListener(listener);
+    };
+  }, [closeFinder, isVisible, openFinder]);
 
   return (
     <div
