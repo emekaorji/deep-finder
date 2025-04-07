@@ -36,7 +36,8 @@ const manifest = {
     type: 'module',
   },
   action: {
-    default_title: 'Click me!',
+    default_title: 'Deep Finder',
+    default_icon: 'icon-34.png',
   },
   chrome_url_overrides: {},
   icons: {
