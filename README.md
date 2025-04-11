@@ -1,4 +1,4 @@
-# Deep Finder (<kbd>Shift+F</kbd>)
+# Deep Finder <kbd>(Shift+F)</kbd>
 
 ![Deep Finder Logo](https://res.cloudinary.com/coderabbi/image/upload/v1743904629/deep-finder/deep-finder-logo-large_shsj48.png)
 
