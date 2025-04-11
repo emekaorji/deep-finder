@@ -12,6 +12,8 @@
 
 A powerful Chrome extension that enhances in-page search capabilities beyond the browser's default find functionality.
 
+![Deep Finder Search Bar](https://res.cloudinary.com/coderabbi/image/upload/v1744387877/deep-finder/deep-finder-strip_lwzfzi.png)
+
 ## Features
 
 Deep Finder provides an advanced set of search capabilities that go well beyond the default browser search:
