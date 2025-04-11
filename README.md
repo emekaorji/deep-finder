@@ -25,7 +25,10 @@ Deep Finder provides an advanced set of search capabilities that go well beyond 
 - **Intuitive Navigation**: Quickly move between search results
 - **Keyboard Shortcuts**: Efficiently search without losing your flow
 
-![Deep Finder in action](https://res.cloudinary.com/coderabbi/video/upload/v1744135405/deep-finder/deep-finder-demo-final_adcmp4.mp4)
+
+https://github.com/user-attachments/assets/683689b1-5fb1-49d9-819b-c1110f3501e2
+
+
 
 ## Installation
 
