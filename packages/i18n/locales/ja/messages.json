@@ -1,0 +1,10 @@
+{
+  "extensionDescription": {
+    "description": "Extension description",
+    "message": "ウェブページのコンテンツを検索する強力な検索ツールです。"
+  },
+  "extensionName": {
+    "description": "Extension name",
+    "message": "ディープファインダー"
+  }
+}

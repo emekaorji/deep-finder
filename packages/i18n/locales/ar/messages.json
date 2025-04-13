@@ -1,10 +1,10 @@
 {
   "extensionDescription": {
     "description": "Extension description",
-    "message": "A powerful search tool that helps you find content across web pages"
+    "message": "أداة بحث قوية تجد المحتوى في صفحات الويب."
   },
   "extensionName": {
     "description": "Extension name",
-    "message": "Deep Finder"
+    "message": "ديب فايندر"
   }
 }

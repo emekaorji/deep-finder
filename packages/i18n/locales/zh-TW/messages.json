@@ -1,10 +1,10 @@
 {
   "extensionDescription": {
     "description": "Extension description",
-    "message": "A powerful search tool that helps you find content across web pages"
+    "message": "一個強大的搜尋工具，可以在網頁上查找內容。"
   },
   "extensionName": {
     "description": "Extension name",
-    "message": "Deep Finder"
+    "message": "深度查找器"
   }
 }
